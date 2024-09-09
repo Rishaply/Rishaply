@@ -74,6 +74,23 @@
             font-size: 1rem;
             padding: 8px 16px;
         }
+        #sleep-dialog {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+        }
+        .dialog-buttons {
+            margin-top: 10px;
+            display: flex;
+            justify-content: space-around;
+        }
     </style>
 </head>
 <body>
@@ -87,6 +104,21 @@
             <input type="time" id="alarm-time">
             <button onclick="setAlarm()">Set Alarm</button>
             <button class="stop-button" onclick="stopAlarm()" style="display: none;" id="stop-button">Stop Alarm</button>
+        </div>
+    </div>
+
+    <!-- Sleep Timer Dialog -->
+    <div id="sleep-dialog">
+        <h3>Set Sleep Timer</h3>
+        <label for="sleep-hours">Hours:</label>
+        <input type="number" id="sleep-hours" min="0" value="0"><br>
+        <label for="sleep-minutes">Minutes:</label>
+        <input type="number" id="sleep-minutes" min="0" value="0"><br>
+        <label for="sleep-seconds">Seconds:</label>
+        <input type="number" id="sleep-seconds" min="0" value="0"><br>
+        <div class="dialog-buttons">
+            <button onclick="startSleepTimer()">Start</button>
+            <button onclick="closeSleepDialog()">Cancel</button>
         </div>
     </div>
 
@@ -125,7 +157,6 @@
             if (alarmInput) {
                 alarmTime = alarmInput;
                 alert(`Alarm set for ${alarmTime}`);
-                // Notify user about the alarm set
                 showNotification('Alarm Set', `Alarm is set for ${alarmTime}`);
             }
         }
@@ -162,11 +193,21 @@
             }
         }
 
-        // Function to start the sleep timer
+        // Show the sleep dialog
+        document.getElementById('sleep-button').addEventListener('click', () => {
+            document.getElementById('sleep-dialog').style.display = 'block';
+        });
+
+        // Close the sleep dialog
+        function closeSleepDialog() {
+            document.getElementById('sleep-dialog').style.display = 'none';
+        }
+
+        // Start sleep timer function
         function startSleepTimer() {
-            const hours = parseInt(prompt('Enter hours:'), 10) || 0;
-            const minutes = parseInt(prompt('Enter minutes:'), 10) || 0;
-            const seconds = parseInt(prompt('Enter seconds:'), 10) || 0;
+            const hours = parseInt(document.getElementById('sleep-hours').value, 10) || 0;
+            const minutes = parseInt(document.getElementById('sleep-minutes').value, 10) || 0;
+            const seconds = parseInt(document.getElementById('sleep-seconds').value, 10) || 0;
 
             const totalSeconds = (hours * 3600) + (minutes * 60) + seconds;
 
@@ -184,10 +225,10 @@
                 alert('Sleep time is over.');
                 showNotification('Sleep Timer Ended', 'Your sleep timer has ended.');
             }, totalSeconds * 1000);
-        }
 
-        // Event listener for sleep button
-        document.getElementById('sleep-button').addEventListener('click', startSleepTimer);
+            closeSleepDialog(); // Close the dialog after starting the timer
+        }
     </script>
 </body>
-</html>
+            </html>
+            
