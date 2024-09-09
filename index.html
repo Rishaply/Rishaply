@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alarm Clock with Notifications</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: #f0f4f8;
+            font-family: Arial, sans-serif, poppins;
+            background-color: powderblue;
+        }
+        .alarm-container {
+            text-align: center;
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        .time-display {
+            font-size: 3rem;
+            margin-bottom: 20px;
+        }
+        .alarm-setter {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        input[type="time"] {
+            font-size: 1.2rem;
+            padding: 5px;
+        }
+        button {
+            font-size: 1.2rem;
+            padding: 10px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        .stop-button {
+            background: #f44336;
+        }
+        .stop-button:hover {
+            background: #e53935;
+        }
+        header {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            width: 100%;
+            box-sizing: border-box;
+            position: absolute;
+            top: 0;
+            left: 0;
+            background: #fff;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .header-title {
+            font-size: 1.5rem;
+            margin: 0;
+        }
+        .header-button {
+            font-size: 1rem;
+            padding: 8px 16px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1 class="header-title">Alarm Clock</h1>
+        <button id="sleep-button" class="header-button">Sleep</button>
+    </header>
+    <div class="alarm-container">
+        <div class="time-display" id="current-time">00:00:00</div>
+        <div class="alarm-setter">
+            <input type="time" id="alarm-time">
+            <button onclick="setAlarm()">Set Alarm</button>
+            <button class="stop-button" onclick="stopAlarm()" style="display: none;" id="stop-button">Stop Alarm</button>
+        </div>
+    </div>
+
+    <!-- Alarm and Sleep Audio -->
+    <audio id="alarm-sound" src="khesari_lal_song.mp3" preload="auto"></audio>
+    <audio id="sleep-sound" src="sleep_song.mp3" preload="auto"></audio>
+
+    <script>
+        // Request notification permission on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            if (Notification.permission !== 'granted') {
+                Notification.requestPermission().then(permission => {
+                    if (permission !== 'granted') {
+                        alert('Notifications are disabled. Please enable them to use this feature.');
+                    }
+                });
+            }
+        });
+
+        // Update the current time display
+        function updateTime() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            document.getElementById('current-time').textContent = `${hours}:${minutes}:${seconds}`;
+        }
+
+        setInterval(updateTime, 1000);
+
+        let alarmTime = null;
+
+        // Set alarm function
+        function setAlarm() {
+            const alarmInput = document.getElementById('alarm-time').value;
+            if (alarmInput) {
+                alarmTime = alarmInput;
+                alert(`Alarm set for ${alarmTime}`);
+                // Notify user about the alarm set
+                showNotification('Alarm Set', `Alarm is set for ${alarmTime}`);
+            }
+        }
+
+        // Stop alarm function
+        function stopAlarm() {
+            const alarmSound = document.getElementById('alarm-sound');
+            alarmSound.pause();
+            alarmSound.currentTime = 0; // Reset audio
+            document.getElementById('stop-button').style.display = 'none'; // Hide stop button
+            showNotification('Alarm Stopped', 'The alarm has been stopped.');
+        }
+
+        // Check every second if it's time for the alarm to ring
+        setInterval(() => {
+            const now = new Date();
+            const currentTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+            if (alarmTime === currentTime) {
+                const alarmSound = document.getElementById('alarm-sound');
+                alarmSound.play();
+                document.getElementById('stop-button').style.display = 'block'; // Show stop button
+                alarmTime = null; // Reset alarm
+                showNotification('Alarm', 'The alarm is ringing!');
+            }
+        }, 1000);
+
+        // Function to show a notification
+        function showNotification(title, message) {
+            if (Notification.permission === 'granted') {
+                new Notification(title, {
+                    body: message,
+                    icon: 'https://example.com/icon.png', // Replace with your icon URL
+                });
+            }
+        }
+
+        // Function to start the sleep timer
+        function startSleepTimer() {
+            const hours = parseInt(prompt('Enter hours:'), 10) || 0;
+            const minutes = parseInt(prompt('Enter minutes:'), 10) || 0;
+            const seconds = parseInt(prompt('Enter seconds:'), 10) || 0;
+
+            const totalSeconds = (hours * 3600) + (minutes * 60) + seconds;
+
+            if (totalSeconds <= 0) {
+                alert('Please enter a valid time.');
+                return;
+            }
+
+            const sleepSound = document.getElementById('sleep-sound');
+            sleepSound.play();
+
+            setTimeout(() => {
+                sleepSound.pause();
+                sleepSound.currentTime = 0; // Reset audio
+                alert('Sleep time is over.');
+                showNotification('Sleep Timer Ended', 'Your sleep timer has ended.');
+            }, totalSeconds * 1000);
+        }
+
+        // Event listener for sleep button
+        document.getElementById('sleep-button').addEventListener('click', startSleepTimer);
+    </script>
+</body>
+</html>
