@@ -1,1 +1,2 @@
-
+make uploads directory in same directory where all the files suvh as index.html
+then inside uploads folder create another directory private and also groups
